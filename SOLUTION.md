@@ -10,3 +10,8 @@
 - Used an in-memory cache that stores the stats and updates it only when the underlying data changes
 - Used `fs.watch` to monitor changes to the data file and invalidate the cache when changes are detected.
 - Added the timestamp of the last update to the cache to ensure that the stats are only recalculated when necessary.
+
+**Testing**
+- Added unit tests using Jest for the items routes in `src/routes/items.js`.
+- Covered both happy path scenarios and error cases, ensuring that the API behaves as expected under various conditions.
+- Ensured that tests are isolated and do not depend on the actual data file, allowing for faster and more reliable test execution (refactored the items router to allow a custom path to the data file).
