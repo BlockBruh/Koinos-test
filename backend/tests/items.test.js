@@ -40,24 +40,26 @@ describe('Items API', () => {
     it('GET /api/items should return empty array', async () => {
         const res = await request(app).get('/api/items');
         expect(res.statusCode).toBe(200);
-        expect(res.body).toEqual([]);
+        expect(res.body.items).toEqual([]);
+        expect(res.body.total).toEqual(0);
     });
 
     it('GET /api/items should return the items correctly', async () => {
         await addMockItems();
         const res = await request(app).get('/api/items');
         expect(res.statusCode).toBe(200);
-        expect(res.body).toHaveLength(3);
-        expect(res.body[0]).toEqual(mockItems[0]);
-        expect(res.body[1]).toEqual(mockItems[1]);
-        expect(res.body[2]).toEqual(mockItems[2]);
+        expect(res.body.items).toHaveLength(3);
+        expect(res.body.items[0]).toEqual(mockItems[0]);
+        expect(res.body.items[1]).toEqual(mockItems[1]);
+        expect(res.body.items[2]).toEqual(mockItems[2]);
+        expect(res.body.total).toEqual(3);
     });
 
     it('GET /api/items should create the file if it does not exist', async () => {
         await deleteDataFile();
         const res = await request(app).get('/api/items');
         expect(res.statusCode).toBe(200);
-        expect(res.body).toEqual([]);
+        expect(res.body.items).toEqual([]);
     });
 
     it('GET /api/items/:id should return the created item', async () => {
@@ -77,14 +79,23 @@ describe('Items API', () => {
 
     it('GET /api/items with query should filter and limit results', async () => {
         await addMockItems();
-        const res = await request(app)
+        let res = await request(app)
             .get('/api/items')
-            .query({ q: 'item', limit: 2 });
+            .query({ q: 'item', page: 1, limit: 2 });
 
         expect(res.statusCode).toBe(200);
-        expect(res.body.length).toBe(2);
-        expect(res.body[0].name.toLowerCase()).toContain('item');
-        expect(res.body[1].name.toLowerCase()).toContain('item');
+        expect(res.body.items.length).toBe(2);
+        expect(res.body.items[0].name.toLowerCase()).toContain('item');
+        expect(res.body.items[1].name.toLowerCase()).toContain('item');
+
+        res = await request(app)
+            .get('/api/items')
+            .query({ q: 'item', page: 2, limit: 2 });
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.items.length).toBe(1);
+        expect(res.body.items[0].name.toLowerCase()).toContain('item');
+        expect(res.body.items[0].name).toBe(mockItems[2].name);
     });
 
     it('POST /api/items should create a new item', async () => {
